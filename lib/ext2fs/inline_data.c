@@ -280,6 +280,7 @@ static errcode_t ext2fs_inline_data_convert_dir(ext2_filsys fs, ext2_ino_t ino,
 	unsigned int rec_len;
 	int csum_size = 0;
 	int filetype = 0;
+	unsigned rec_len;
 
 	if (ext2fs_has_feature_metadata_csum(fs->super))
 		csum_size = sizeof(struct ext2_dir_entry_tail);

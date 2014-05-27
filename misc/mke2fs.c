@@ -16,7 +16,8 @@
  * enforced (but it's not much fun on a character device :-).
  */
 
-#define _XOPEN_SOURCE 600
+
+#define _XOPEN_SOURCE 600 /* for inclusion of PATH_MAX */
 
 #include "config.h"
 #include <stdio.h>
@@ -356,7 +357,7 @@ static void write_reserved_inodes(ext2_filsys fs)
 
 	retval = ext2fs_get_memzero(EXT2_INODE_SIZE(fs->super), &inode);
 	if (retval) {
-		com_err("inode_init", retval, _("while allocating memory"));
+		com_err("inode_init", retval, "while allocating memory");
 		exit(1);
 	}
 
@@ -2037,11 +2038,17 @@ profile_error:
 	 */
 	if (for_hurd(creator_os)) {
 		if (ext2fs_has_feature_filetype(&fs_param)) {
+
+		if (fs_param.s_feature_incompat &
+		    EXT2_FEATURE_INCOMPAT_FILETYPE) {
 			fprintf(stderr, "%s", _("The HURD does not support the "
 						"filetype feature.\n"));
 			exit(1);
 		}
 		if (ext2fs_has_feature_huge_file(&fs_param)) {
+
+		if (fs_param.s_feature_ro_compat &
+		    EXT4_FEATURE_RO_COMPAT_HUGE_FILE) {
 			fprintf(stderr, "%s", _("The HURD does not support the "
 						"huge_file feature.\n"));
 			exit(1);
@@ -2054,6 +2061,11 @@ profile_error:
 		if (ext2fs_has_feature_ea_inode(&fs_param)) {
 			fprintf(stderr, "%s", _("The HURD does not support the "
 						"ea_inode feature.\n"));
+
+		if (fs_param.s_feature_ro_compat &
+		    EXT4_FEATURE_RO_COMPAT_METADATA_CSUM) {
+			fprintf(stderr, "%s", _("The HURD does not support the "
+						"metadata_csum feature.\n"));
 			exit(1);
 		}
 	}
@@ -2914,6 +2926,11 @@ int main (int argc, char *argv[])
 	    !ext2fs_has_feature_journal_dev(fs->super) &&
 	    ext2fs_has_feature_metadata_csum(fs->super)) {
 		if (!ext2fs_has_feature_extents(fs->super))
+
+	    EXT2_HAS_RO_COMPAT_FEATURE(fs->super,
+				       EXT4_FEATURE_RO_COMPAT_METADATA_CSUM)) {
+		if (!EXT2_HAS_INCOMPAT_FEATURE(fs->super,
+				EXT3_FEATURE_INCOMPAT_EXTENTS))
 			printf("%s",
 			       _("Extents are not enabled.  The file extent "
 				 "tree can be checksummed, whereas block maps "
@@ -2921,6 +2938,9 @@ int main (int argc, char *argv[])
 				 "coverage of metadata checksumming.  "
 				 "Pass -O extents to rectify.\n"));
 		if (!ext2fs_has_feature_64bit(fs->super))
+
+		if (!EXT2_HAS_INCOMPAT_FEATURE(fs->super,
+				EXT4_FEATURE_INCOMPAT_64BIT))
 			printf("%s",
 			       _("64-bit filesystem support is not enabled.  "
 				 "The larger fields afforded by this feature "
@@ -2933,6 +2953,7 @@ int main (int argc, char *argv[])
 		printf("%s", _("The metadata_csum_seed feature "
 			       "requires the metadata_csum feature.\n"));
 		exit(1);
+
 	}
 
 	/* Calculate journal blocks */
