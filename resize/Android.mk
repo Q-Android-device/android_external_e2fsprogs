@@ -22,7 +22,6 @@ resize2fs_shared_libraries := \
 resize2fs_system_shared_libraries := libc
 
 include $(CLEAR_VARS)
-
 LOCAL_SRC_FILES := $(resize2fs_src_files)
 LOCAL_C_INCLUDES := $(resize2fs_c_includes)
 LOCAL_CFLAGS := $(resize2fs_cflags)
