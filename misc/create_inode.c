@@ -14,7 +14,6 @@
 #define _GNU_SOURCE		1
 
 #include "config.h"
-
 #include <time.h>
 #include <sys/stat.h>
 #include <sys/types.h>
